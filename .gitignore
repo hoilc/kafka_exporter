@@ -23,3 +23,7 @@ kafka_exporter
 
 # Test configuration
 test/
+
+.vscode
+.idea
+.DS_Store
