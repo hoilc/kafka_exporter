@@ -2,9 +2,7 @@ name: Go
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ '*' ]
 
 jobs:
 
@@ -38,10 +36,20 @@ jobs:
       run:  make
       working-directory: ./src/github.com/${{ github.repository }}
 
-    - name: Build Image
+    - name: Build & Push Image (master)
       env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       run: |
           docker build -f ./Dockerfile -t hoilc/kafka_exporter:latest .
           docker push hoilc/kafka_exporter:latest
       working-directory: ./src/github.com/${{ github.repository }}
+      if: github.ref == 'refs/heads/master'
+
+    - name: Build & Push Image (others)
+      env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      run: |
+          docker build -f ./Dockerfile -t hoilc/kafka_exporter:${GITHUB_REF#refs/heads/} .
+          docker push hoilc/kafka_exporter:${GITHUB_REF#refs/heads/}
+      working-directory: ./src/github.com/${{ github.repository }}
+      if: github.ref != 'refs/heads/master'
