@@ -380,6 +380,10 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			ch <- prometheus.MustNewConstMetric(
 				consumergroupMembers, prometheus.GaugeValue, float64(len(group.Members)), group.GroupId,
 			)
+			if len(group.Members) == 0 {
+				plog.Warnf("Found no consumers in group %s, skipped", group.GroupId)
+				continue
+			}
 			if offsetFetchResponse, err := broker.FetchOffset(&offsetFetchRequest); err != nil {
 				plog.Errorf("Cannot get offset of group %s: %v", group.GroupId, err)
 			} else {
